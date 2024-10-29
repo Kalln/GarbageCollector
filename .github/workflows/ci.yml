@@ -1,0 +1,32 @@
+name: refmem continuous integration test suite
+
+on:
+  push:
+    branches: []
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: update-ubuntu
+      run: sudo apt-get update
+    - name: setup-dependencies
+      run: sudo apt-get install clang libcunit1 libcunit1-doc libcunit1-dev valgrind lcov
+    - name: test-sanitize
+      run: make test SANITIZE=address,undefined -j
+    - name: clean-san
+      run: make clean
+    - name: test-compile-gcc
+      run: make all CC=gcc -j
+    - name: test-valgrind
+      run: make memtest
+    - name: get-test-coverage
+      run: make coverage -j
+    - name: clean-for-clang
+      run: make clean
+    - name: test-compile-clang
+      run: make all CC=clang -j
